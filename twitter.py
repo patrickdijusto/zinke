@@ -1,20 +1,20 @@
-import settings
+#import settings
 
 import PyPDF2
 
 ##from folium 
 
-import folium
-import tweepy
-from textblob import TextBlob
+#import folium
+#import tweepy
+#from textblob import TextBlob
 import preprocessor as p
-from geopy.geocoders import Nominatim
-import random as rx
+#from geopy.geocoders import Nominatim
+#import random as rx
 
-print(folium.__version__)
+#print(folium.__version__)
 
 # creating a pdf file object 
-pdfFileObj = open('example.pdf', 'rb') 
+pdfFileObj = open('2018-10 Release Set 1 Doc 10.pdf', 'rb') 
 
 # creating a pdf reader object 
 pdfReader = PyPDF2.PdfFileReader(pdfFileObj) 
@@ -25,11 +25,24 @@ print(pdfReader.numPages)
 # creating a page object 
 pageObj = pdfReader.getPage(0) 
 
+
+text = pageObj.extractText().encode('utf-8')
+
+
+print('DOI DAILY UPDATE' in text)
+print("Home" in text)
+print(True)
+print(text.find('Home'))
+
 # extracting text from page 
-print(pageObj.extractText()) 
+print(text) 
 
 # closing the pdf file object 
 pdfFileObj.close() 
+
+
+
+
 
 
 
@@ -105,6 +118,6 @@ CONSUMER_KEY = "kl4C3rLcKKPa1dlL1wlwPnxVh"
 CONSUMER_SECRET = "CDdzJ3yVAKKSKLBN7If4Vxd9aAXGriVs7E5rdKjTNBtWrKmoMa"
 
 	
-print(CONSUMER_KEY)
+##print(CONSUMER_KEY)
     
-mx(CONSUMER_KEY, CONSUMER_SECRET, OAUTH_TOKEN, OAUTH_SECRET)
+##mx(CONSUMER_KEY, CONSUMER_SECRET, OAUTH_TOKEN, OAUTH_SECRET)
