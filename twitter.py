@@ -22,21 +22,22 @@ pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
 # printing number of pages in pdf file 
 print(pdfReader.numPages) 
 
+num =0
+
+text = ""
+
+while num <pdfReader.numPages-1:
 # creating a page object 
-pageObj = pdfReader.getPage(0) 
+	pageObj = pdfReader.getPage(num) 
+	text = text + pageObj.extractText().encode('utf-8')
+	num += 1
 
 
-text = pageObj.extractText().encode('utf-8')
-
-
-print('DOI DAILY UPDATE' in text)
-print("Home" in text)
-print(True)
-print(text.find('Home'))
-
-# extracting text from page 
 print(text) 
-
+print(('DOI DAILY UPDATE' in text))
+print(text.find("Accepted"))
+print(text.find("Regretted"))
+print(text.find("Outstanding Invitations in Process"))
 # closing the pdf file object 
 pdfFileObj.close() 
 
