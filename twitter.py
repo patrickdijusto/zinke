@@ -4,12 +4,12 @@ import PyPDF2
 
 ##from folium 
 
-#import folium
+import folium
 #import tweepy
 #from textblob import TextBlob
 import preprocessor as p
-#from geopy.geocoders import Nominatim
-#import random as rx
+from geopy.geocoders import Nominatim
+import random as rx
 
 #print(folium.__version__)
 
@@ -29,79 +29,134 @@ text = ""
 while num <pdfReader.numPages-1:
 # creating a page object 
 	pageObj = pdfReader.getPage(num) 
-	text = text + pageObj.extractText().encode('utf-8')
+	text = text + pageObj.extractText()#.decode('utf-8')
 	num += 1
+pdfFileObj.close() 
 
 
 print(text) 
 print(('DOI DAILY UPDATE' in text))
-print(text.find("Accepted"))
-print(text.find("Regretted"))
-print(text.find("Outstanding Invitations in Process"))
+accn = text.find("Accepted")
+
+print(accn)
+regn = text.find("Regretted")
+print(regn)
+outn = text.find("Outstanding Invitations in Process")
+print(outn)
 # closing the pdf file object 
-pdfFileObj.close() 
 
+print(text[accn:accn+8]) 
+print(text[regn:regn+9])
+print(text[outn:outn+10])
 
+accs = text[accn+8:regn]
+regs = text[regn+9:outn]
 
+print(text[accn:accn+8]) 
+print(accs)
 
+print(text[regn:regn+9])
+print(regs)
 
+num2 = 0
+num = 0
 
+mapvar = folium.Map(location=[45.38, -121.67], zoom_start=3, width = 1200, height = 700)
+geolocator = Nominatim(user_agent = 'tweet_plot')
 
-def mx(a, b, c, d):
-    '''Function to geocode the location data, perform sentiment analysis and plot on the map'''
-    mapvar = folium.Map(location=[45.38, -121.67], zoom_start=3, width = 1200, height = 700)
-    geolocator = Nominatim(user_agent = 'tweet_plot')
-    # Row number
-    i = 0
-    try:
-        for tweet in tweepy.Cursor(api.search, q=hashtag, lang="en", show_user=True).items():
-            tweet_location = p.clean(tweet.user.location)
-            print(tweet_location)
-            try:
-                location = geolocator.geocode(tweet_location)
-            except:
-                location = "NULL"
+while num >= 0:
+	num = accs.find('(',num2+1)
+	num2 = accs.find(')', num)
+	
+	print(num, num2)
+	
+	loc = p.clean(accs[num:num2])
+	print(loc)
+	
+	try:
+		location = geolocator.geocode(loc)
+	except:
+		location = "NULL"
 				
-            if location == "None":
-               location = "NULL"
+	if location == "None":
+		location = "NULL"
+		
+	# write in excel only if location is not null
+	if location != "NULL" and location is not None:
+		# clean tweet
+		lax = location.latitude +((rx.random()/100)-0.005)				
+		lox = location.longitude +((rx.random()/100)-0.005)	
+		print(lax, lox)
+	
+	print(location)
+	icon = folium.Icon(color='green', icon = 'comment')
+	
+	try:
+		folium.Marker(location=[lax, lox], icon=icon).add_to(mapvar)
+	except:
+		pass
+	num = num2+1
+	print(num)
+		
+
+mapvar.save('twittermap.html')
+
+
+# def mx(a, b, c, d):
+    # '''Function to geocode the location data, perform sentiment analysis and plot on the map'''
+    # mapvar = folium.Map(location=[45.38, -121.67], zoom_start=3, width = 1200, height = 700)
+    # geolocator = Nominatim(user_agent = 'tweet_plot')
+    # # Row number
+    # i = 0
+    # try:
+        # for tweet in tweepy.Cursor(api.search, q=hashtag, lang="en", show_user=True).items():
+            # location = p.clean(tweet.user.location)
+            # print(tweet_location)
+            # try:
+                # location = geolocator.geocode(tweet_location)
+            # except:
+                # location = "NULL"
+				
+            # if location == "None":
+               # location = "NULL"
 			   
-            # write in excel only if location is not null
-            if location != "NULL" and tweet_location != '' and location is not None:
-                # clean tweet
-                type(tweet.text)
-                lax = location.latitude +((rx.random()/100)-0.005)				
-                lox = location.longitude +((rx.random()/100)-0.005)	
+            # # write in excel only if location is not null
+            # if location != "NULL" and tweet_location != '' and location is not None:
+                # # clean tweet
+                # type(tweet.text)
+                # lax = location.latitude +((rx.random()/100)-0.005)				
+                # lox = location.longitude +((rx.random()/100)-0.005)	
             
             
-            tweet_text = p.tokenize(tweet.text.encode('UTF-8'))[2:]
-            print(tweet_text)       
-            print(location)
-            print("\n")
-            tip = folium.Tooltip(tweet.text, sticky=False)
-            #print(".")
+            # tweet_text = p.tokenize(tweet.text.encode('UTF-8'))[2:]
+            # print(tweet_text)       
+            # print(location)
+            # print("\n")
+            # tip = folium.Tooltip(tweet.text, sticky=False)
+            # #print(".")
 			
-            # sentiment analysis
-            feelings = TextBlob(tweet_text).sentiment.polarity
-            icon = folium.Icon()
-            if feelings >= 0:
-                i = i + 1
-                icon = folium.Icon(color='blue', icon = 'comment')
-            elif feelings < 0:
-                i = i + 1
-                icon = folium.Icon(color='red')
+            # # sentiment analysis
+            # feelings = TextBlob(tweet_text).sentiment.polarity
+            # icon = folium.Icon()
+            # if feelings >= 0:
+                # i = i + 1
+                # icon = folium.Icon(color='blue', icon = 'comment')
+            # elif feelings < 0:
+                # i = i + 1
+                # icon = folium.Icon(color='red')
 				
-            #lax = location.latitude +((rx.random()/100)-0.005)				
-            #lox = location.longitude +((rx.random()/100)-0.005)				
+            # #lax = location.latitude +((rx.random()/100)-0.005)				
+            # #lox = location.longitude +((rx.random()/100)-0.005)				
 				
-            try:
-                folium.Marker(location=[lax, lox], icon=icon, tooltip=tip).add_to(mapvar)
-            except:
-                pass
-            if i == limiting_value:
-                break
-    except tweepy.error.TweepError:
-        print("Check your credentials for correctness")
-    mapvar.save('twittermap.html')
+            # try:
+                # folium.Marker(location=[lax, lox], icon=icon, tooltip=tip).add_to(mapvar)
+            # except:
+                # pass
+            # if i == limiting_value:
+                # break
+    # except tweepy.error.TweepError:
+        # print("Check your credentials for correctness")
+    # mapvar.save('twittermap.html')
     
     
 # if __name__ == '__main__':
@@ -110,15 +165,7 @@ def mx(a, b, c, d):
     # # consumer_secret = CONSUMER_SECRET
     # # access_token = OAUTH_TOKEN
     # # access_secret = OAUTH_SECRET
-OAUTH_TOKEN = "832776374603505664-0v91MI87pZKJrXBXditUsvnwfjr17MV"
 
-OAUTH_SECRET = "qHYS33mXIABMC6jxkG7DdxS1ohM6VfTTZRmAyja0EK2qc"
-
-CONSUMER_KEY = "kl4C3rLcKKPa1dlL1wlwPnxVh"
-
-CONSUMER_SECRET = "CDdzJ3yVAKKSKLBN7If4Vxd9aAXGriVs7E5rdKjTNBtWrKmoMa"
-
-	
 ##print(CONSUMER_KEY)
     
 ##mx(CONSUMER_KEY, CONSUMER_SECRET, OAUTH_TOKEN, OAUTH_SECRET)
